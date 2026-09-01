@@ -9,11 +9,13 @@ This project implements fundamental image-processing operations using Python, Op
 ## Repository Structure
 
 - input/ — original personally captured photograph
+- csv/ — numerical matrices and metadata from image preparation
 - images/ — prepared square crop and final 200 × 200 image
 - outputs/ — OpenCV-generated images and numerical matrices
-- manual/ — manual calculation inputs, outputs, OpenCV comparison matrices, difference matrices, and verification results
-- prepare_image.py — image preparation
-- opencv_operations.py — required OpenCV operations
+- manual/ — manual calculation inputs, outputs, comparison matrices, difference matrices, kernels, and verification results
+- prepare_image.py — image preparation and metadata generation
+- opencv_operations.py — required OpenCV image-processing operations
+- manual_calculations.py — independent manual matrix calculations
 - verify_matrices.py — comparison of manual and OpenCV matrices
 - requirements.txt — Python package requirements
 
@@ -23,16 +25,16 @@ This project implements fundamental image-processing operations using Python, Op
 
 ## Original Image
 
-I used the same personally captured photograph for all parts of the assignment.
+I used the same personally captured photograph throughout the assignment.
 
-The original image dimensions were:
+The original image was loaded using OpenCV. Its dimensions were:
 
 - Width: 818 pixels
 - Height: 1101 pixels
 - Channels: 3
 - Data type: uint8
 
-I center-cropped the original image to a square and then resized the square image to 200 × 200 pixels.
+I center-cropped the original photograph to a square and then resized the square image to 200 × 200 pixels.
 
 The final image dimensions were:
 
@@ -43,72 +45,77 @@ The final image dimensions were:
 
 The square crop and final 200 × 200 image are stored in the images/ folder.
 
+## Image Metadata
+
+The final image has the following properties:
+
+- Shape: (200, 200, 3)
+- Data type: uint8
+- Minimum pixel value: 0
+- Maximum pixel value: 255
+- Mean pixel value: approximately 118.07
+- Standard deviation: approximately 64.27
+
+The metadata and numerical image matrices are stored as CSV files in the csv/ folder.
+
+## BGR and RGB Channel Ordering
+
+OpenCV loads color images using BGR channel ordering rather than RGB ordering.
+
+BGR represents the channels in this order:
+
+```text
+Blue, Green, Red
+
 ---
 
 # Part B — OpenCV Image Processing
 
-I performed the required image-processing operations using OpenCV. The resulting images and numerical CSV matrices are stored in the outputs/ folder.
+The required image-processing operations were performed using OpenCV. Unless otherwise noted, the operations use the prepared 200 × 200 image or its 200 × 200 grayscale version. Numerical outputs are stored as CSV files in outputs/, and the corresponding processed images are also included in outputs/.
 
 ## Color and Intensity Operations
 
-The following color and intensity operations were performed:
+| Operation | Purpose | OpenCV Function | Important Parameters | Output Size | Observation |
+|---|---|---|---|---|---|
+| Grayscale | Convert the color image to one intensity channel | cv2.cvtColor | COLOR_BGR2GRAY | 200 × 200 | Color information is removed while image structure and intensity differences remain visible. |
+| Blue channel | Isolate the blue component | Channel indexing | BGR channel 0 | 200 × 200 | Shows the contribution of the blue channel to the original image. |
+| Green channel | Isolate the green component | Channel indexing | BGR channel 1 | 200 × 200 | Shows the contribution of the green channel to the original image. |
+| Red channel | Isolate the red component | Channel indexing | BGR channel 2 | 200 × 200 | Shows the contribution of the red channel to the original image. |
+| BGR reconstruction | Recombine the three separated channels | cv2.merge | Blue, green, red channels | 200 × 200 × 3 | Reconstructing the channels in BGR order reproduces the color image. |
+| Negative | Invert pixel intensities | cv2.bitwise_not | 8-bit input | 200 × 200 | Bright regions become dark and dark regions become bright. |
+| Brightness +40 | Increase image intensity | cv2.add | +40, clipped to 255 | 200 × 200 | The image becomes brighter and high values saturate at 255. |
+| Contrast ×1.25 | Increase differences between intensity values | cv2.convertScaleAbs | alpha = 1.25, beta = 0 | 200 × 200 | Intensity differences become stronger while values remain within the 8-bit range. |
+| Binary threshold | Separate pixels into black and white regions | cv2.threshold | threshold = 127, max = 255 | 200 × 200 | The grayscale image is reduced to two intensity values, 0 and 255. |
+| Histogram equalization | Redistribute grayscale intensities | cv2.equalizeHist | Grayscale input | 200 × 200 | The intensity distribution is changed to improve contrast. |
 
-1. Grayscale conversion
-2. Blue-channel extraction
-3. Green-channel extraction
-4. Red-channel extraction
-5. BGR channel reconstruction
-6. Negative transformation
-7. Brightness increase of +40
-8. Contrast scaling by 1.25
-9. Binary threshold at 127
-10. Histogram equalization
-
-For the negative transformation, each pixel was calculated using:
-
-```text
-output = 255 - input
-```
-
-For the brightness operation, 40 was added to each pixel value and the result was clipped to the valid range of 0–255.
-
-For contrast adjustment, each pixel value was multiplied by 1.25 and clipped to the valid range.
-
-For binary thresholding:
-
-```text
-If pixel > 127, output = 255
-Otherwise, output = 0
-```
+The original and equalized histograms are stored in outputs/color_intensity/histograms/.
 
 ---
 
 ## Geometric Operations
 
-The following geometric operations were performed:
-
-1. Center crop to 100 × 100
-2. Horizontal flip
-3. Vertical flip
-4. 90-degree clockwise rotation
-5. 30-degree rotation about the image center
-6. Resize to 100 × 100
-7. Resize back to 200 × 200 using nearest-neighbor interpolation
-8. Resize back to 200 × 200 using bilinear interpolation
-
-The nearest-neighbor and bilinear interpolation results were saved separately so that their visual differences could be compared.
+| Operation | Purpose | OpenCV Function | Important Parameters | Output Size | Observation |
+|---|---|---|---|---|---|
+| Center crop | Extract the center region | Array slicing | 100 × 100 center region | 100 × 100 | Only the center portion of the image is retained. |
+| Horizontal flip | Reverse the image left-to-right | cv2.flip | flipCode = 1 | 200 × 200 | Left and right positions are reversed. |
+| Vertical flip | Reverse the image top-to-bottom | cv2.flip | flipCode = 0 | 200 × 200 | Top and bottom positions are reversed. |
+| 90° clockwise rotation | Rotate the image by a right angle | cv2.rotate | ROTATE_90_CLOCKWISE | 200 × 200 | Image orientation changes without changing its dimensions. |
+| 30° rotation | Rotate about the image center | cv2.getRotationMatrix2D and cv2.warpAffine | angle = -30° | 200 × 200 | The image is rotated while maintaining the original output dimensions. |
+| Resize to 100 × 100 | Reduce spatial resolution | cv2.resize | size = 100 × 100 | 100 × 100 | The image contains fewer pixels and therefore less spatial detail. |
+| Nearest-neighbor resize | Enlarge the reduced image | cv2.resize | INTER_NEAREST | 200 × 200 | The enlarged image has more visible pixel boundaries and appears more blocky. |
+| Bilinear resize | Enlarge using neighboring pixel values | cv2.resize | INTER_LINEAR | 200 × 200 | The enlarged image appears smoother than the nearest-neighbor result. |
 
 ---
 
 ## Spatial Filtering
 
-The following 3 × 3 spatial filters were applied to the grayscale image:
+| Operation | Purpose | OpenCV Function | Important Parameters | Output Size | Observation |
+|---|---|---|---|---|---|
+| Mean filter | Smooth local intensity variation | cv2.blur | 3 × 3 kernel | 200 × 200 | Averaging reduces local variation but also softens image detail. |
+| Gaussian filter | Perform weighted smoothing | cv2.GaussianBlur | 3 × 3 Gaussian kernel | 200 × 200 | Produces smoothing while weighting pixels near the center more heavily. |
+| Median filter | Replace each pixel with the neighborhood median | cv2.medianBlur | kernel size = 3 | 200 × 200 | Reduces isolated intensity variations while preserving edges better than simple averaging in many areas. |
 
-- Mean filter
-- Gaussian filter
-- Median filter
-
-The Gaussian kernel used for the assignment was:
+The Gaussian kernel used was:
 
 ```text
 1/16 ×
@@ -122,67 +129,58 @@ The Gaussian kernel used for the assignment was:
 
 ## Edge Detection
 
-The following edge-detection operations were performed:
+| Operation | Purpose | OpenCV Function | Important Parameters | Output Size | Observation |
+|---|---|---|---|---|---|
+| Sobel X | Measure horizontal intensity change | cv2.Sobel | dx = 1, dy = 0, ksize = 3 | 200 × 200 | Emphasizes vertical edge structure. |
+| Sobel Y | Measure vertical intensity change | cv2.Sobel | dx = 0, dy = 1, ksize = 3 | 200 × 200 | Emphasizes horizontal edge structure. |
+| Gradient magnitude | Combine Gx and Gy edge strength | NumPy calculation | sqrt(Gx² + Gy²) | 200 × 200 | Represents overall edge strength independent of direction. |
+| Laplacian | Detect rapid intensity changes | cv2.Laplacian | floating-point output | 200 × 200 | Responds to intensity changes in multiple directions. |
+| Canny | Produce a binary edge map | cv2.Canny | lower threshold = 100, upper threshold = 200 | 200 × 200 | Produces a more selective representation of prominent edges. |
 
-- Sobel X
-- Sobel Y
-- Gradient magnitude
-- Laplacian
-- Canny edge detection
-
-Signed and floating-point values were preserved for Sobel and Laplacian calculations so that negative gradient values were not lost before numerical export.
-
-Gradient magnitude was calculated using:
-
-```text
-G = sqrt(Gx^2 + Gy^2)
-```
+Sobel and Laplacian calculations were retained using signed or floating-point data so that negative gradient responses were not lost.
 
 ---
 
 ## Morphological Processing
 
-A 3 × 3 kernel of ones was used for:
+The morphological operations were performed on the binary threshold image using a 3 × 3 kernel of ones.
 
-- Erosion
-- Dilation
-- Opening
-- Closing
-
-These operations were applied to the binary image produced using the threshold value of 127.
+| Operation | Purpose | OpenCV Function | Important Parameters | Output Size | Observation |
+|---|---|---|---|---|---|
+| Erosion | Shrink white foreground regions | cv2.erode | 3 × 3 kernel, 1 iteration | 200 × 200 | White regions become smaller. |
+| Dilation | Expand white foreground regions | cv2.dilate | 3 × 3 kernel, 1 iteration | 200 × 200 | White regions become larger. |
+| Opening | Perform erosion followed by dilation | cv2.morphologyEx | MORPH_OPEN, 3 × 3 kernel | 200 × 200 | Small foreground features can be removed while larger regions remain. |
+| Closing | Perform dilation followed by erosion | cv2.morphologyEx | MORPH_CLOSE, 3 × 3 kernel | 200 × 200 | Small gaps within foreground regions can be reduced or closed. |
 
 ---
 
 ## Contour Analysis
 
-Contours were detected from the binary image.
+Contours were detected from the binary image using OpenCV.
 
-The program generated:
+The following outputs were generated:
 
-- A binary contour mask
-- An image showing all detected contours
-- An image showing the largest contour
+- Binary contour mask
+- Image containing all detected contours
+- Image containing the largest contour
+- CSV file containing measurements for the detected contours
 
-The largest contour was also measured using:
+A total of 99 contours were detected.
 
-- Area
-- Perimeter
-- Bounding rectangle
-- Centroid
+For the largest contour:
 
-For this image, 99 contours were detected.
+| Measurement | Result |
+|---|---:|
+| Area | 9268.5 |
+| Perimeter | 480.98 |
+| Bounding box x | 62 |
+| Bounding box y | 96 |
+| Bounding box width | 138 |
+| Bounding box height | 104 |
+| Centroid x | 143.95 |
+| Centroid y | 159.44 |
 
-The largest contour measurements were:
-
-- Area: 9268.5
-- Perimeter: approximately 480.98
-- Bounding box x-coordinate: 62
-- Bounding box y-coordinate: 96
-- Bounding box width: 138
-- Bounding box height: 104
-- Centroid x-coordinate: approximately 143.95
-- Centroid y-coordinate: approximately 159.44
-
+The largest contour identifies the largest connected boundary detected in the thresholded image. Its area and perimeter describe its size, the bounding rectangle identifies its spatial extent, and the centroid represents its approximate geometric center.
 ---
 
 # Part C — Manual Matrix Calculations
@@ -470,7 +468,427 @@ G ≈ 53.814
 The manual gradient magnitude was approximately 53.814. The OpenCV-based result was also approximately 53.814.
 
 ---
+# Additional Representative Neighborhood Calculations
 
+The 7 × 7 input patch produces a 5 × 5 valid output for operations that use a 3 × 3 neighborhood. Three representative output locations were checked for each neighborhood-based operation: the first output cell, the center output cell, and the last output cell.
+
+## Mean Filter — Three Representative Cells
+
+### Output cell (0,0)
+
+Neighborhood:
+
+```text
+236  242  231
+239  239  227
+238  225  227
+```
+
+Calculation:
+
+```text
+(236 + 242 + 231 + 239 + 239 + 227 + 238 + 225 + 227) / 9
+= 2104 / 9
+= 233.777...
+≈ 234
+```
+
+Manual result: 234
+
+### Output cell (2,2)
+
+Neighborhood:
+
+```text
+227  234  100
+233  198   46
+238  138   32
+```
+
+Calculation:
+
+```text
+(227 + 234 + 100 + 233 + 198 + 46 + 238 + 138 + 32) / 9
+= 1446 / 9
+= 160.666...
+≈ 161
+```
+
+Manual result: 161
+
+### Output cell (4,4)
+
+Neighborhood:
+
+```text
+32  26  31
+35  36  31
+22  65  33
+```
+
+Calculation:
+
+```text
+(32 + 26 + 31 + 35 + 36 + 31 + 22 + 65 + 33) / 9
+= 311 / 9
+= 34.555...
+≈ 35
+```
+
+Manual result: 35
+
+---
+
+## Gaussian Filter — Three Representative Cells
+
+Kernel:
+
+```text
+1  2  1
+2  4  2
+1  2  1
+```
+
+Scale factor: 1/16
+
+### Output cell (0,0)
+
+```text
+1(236) + 2(242) + 1(231)
++ 2(239) + 4(239) + 2(227)
++ 1(238) + 2(225) + 1(227)
+
+= 3754
+
+3754 / 16 = 234.625
+≈ 235
+```
+
+Manual result: 235
+
+### Output cell (2,2)
+
+```text
+1(227) + 2(234) + 1(100)
++ 2(233) + 4(198) + 2(46)
++ 1(238) + 2(138) + 1(32)
+
+= 2691
+
+2691 / 16 = 168.1875
+≈ 168
+```
+
+Manual result: 168
+
+### Output cell (4,4)
+
+```text
+1(32) + 2(26) + 1(31)
++ 2(35) + 4(36) + 2(31)
++ 1(22) + 2(65) + 1(33)
+
+= 576
+
+576 / 16 = 36
+```
+
+Manual result: 36
+
+---
+
+## Median Filter — Three Representative Cells
+
+### Output cell (0,0)
+
+Sorted neighborhood values:
+
+```text
+225, 227, 227, 231, 236, 238, 239, 239, 242
+```
+
+The fifth value is:
+
+```text
+236
+```
+
+Manual result: 236
+
+### Output cell (2,2)
+
+Sorted neighborhood values:
+
+```text
+32, 46, 100, 138, 198, 227, 233, 234, 238
+```
+
+The fifth value is:
+
+```text
+198
+```
+
+Manual result: 198
+
+### Output cell (4,4)
+
+Sorted neighborhood values:
+
+```text
+22, 26, 31, 31, 32, 33, 35, 36, 65
+```
+
+The fifth value is:
+
+```text
+32
+```
+
+Manual result: 32
+
+---
+
+## Sobel Gx — Three Representative Cells
+
+Kernel:
+
+```text
+-1   0   1
+-2   0   2
+-1   0   1
+```
+
+### Output cell (0,0)
+
+```text
+(-1)(236) + (0)(242) + (1)(231)
++ (-2)(239) + (0)(239) + (2)(227)
++ (-1)(238) + (0)(225) + (1)(227)
+
+= -40
+```
+
+Manual result: -40
+
+### Output cell (2,2)
+
+```text
+(-1)(227) + (0)(234) + (1)(100)
++ (-2)(233) + (0)(198) + (2)(46)
++ (-1)(238) + (0)(138) + (1)(32)
+
+= -707
+```
+
+Manual result: -707
+
+### Output cell (4,4)
+
+```text
+(-1)(32) + (0)(26) + (1)(31)
++ (-2)(35) + (0)(36) + (2)(31)
++ (-1)(22) + (0)(65) + (1)(33)
+
+= 2
+```
+
+Manual result: 2
+
+---
+
+## Sobel Gy — Three Representative Cells
+
+Kernel:
+
+```text
+-1  -2  -1
+ 0   0   0
+ 1   2   1
+```
+
+### Output cell (0,0)
+
+```text
+(-1)(236) + (-2)(242) + (-1)(231)
++ (0)(239) + (0)(239) + (0)(227)
++ (1)(238) + (2)(225) + (1)(227)
+
+= -36
+```
+
+Manual result: -36
+
+### Output cell (2,2)
+
+```text
+(-1)(227) + (-2)(234) + (-1)(100)
++ (0)(233) + (0)(198) + (0)(46)
++ (1)(238) + (2)(138) + (1)(32)
+
+= -249
+```
+
+Manual result: -249
+
+### Output cell (4,4)
+
+```text
+(-1)(32) + (-2)(26) + (-1)(31)
++ (0)(35) + (0)(36) + (0)(31)
++ (1)(22) + (2)(65) + (1)(33)
+
+= 70
+```
+
+Manual result: 70
+
+---
+
+## Gradient Magnitude — Three Representative Cells
+
+Gradient magnitude was calculated from the manually computed Sobel Gx and Gy values.
+
+### Output cell (0,0)
+
+```text
+Gx = -40
+Gy = -36
+
+sqrt((-40)^2 + (-36)^2)
+= sqrt(2896)
+≈ 53.814
+```
+
+Manual result: 53.814
+
+### Output cell (2,2)
+
+```text
+Gx = -707
+Gy = -249
+
+sqrt((-707)^2 + (-249)^2)
+= sqrt(561851)
+≈ 749.567
+```
+
+Manual result: 749.567
+
+### Output cell (4,4)
+
+```text
+Gx = 2
+Gy = 70
+
+sqrt((2)^2 + (70)^2)
+= sqrt(4904)
+≈ 70.029
+```
+
+Manual result: 70.029
+
+---
+
+## Erosion — Three Representative Cells
+
+The binary input uses 255 for white foreground pixels and 0 for black background pixels. With a 3 × 3 kernel of ones, erosion produces 255 only when every value in the neighborhood is 255.
+
+### Output cell (0,0)
+
+Neighborhood:
+
+```text
+255  255  255
+255  255  255
+255  255  255
+```
+
+All nine values are 255.
+
+```text
+Output = 255
+```
+
+### Output cell (2,2)
+
+Neighborhood:
+
+```text
+255  255    0
+255  255    0
+255  255    0
+```
+
+The neighborhood contains 0 values.
+
+```text
+Output = 0
+```
+
+### Output cell (4,4)
+
+Neighborhood:
+
+```text
+0  0  0
+0  0  0
+0  0  0
+```
+
+The neighborhood does not contain nine white pixels.
+
+```text
+Output = 0
+```
+
+---
+
+## Dilation — Three Representative Cells
+
+With the same 3 × 3 kernel, dilation produces 255 when at least one value in the neighborhood is 255.
+
+### Output cell (0,0)
+
+```text
+255  255  255
+255  255  255
+255  255  255
+```
+
+At least one white pixel is present.
+
+```text
+Output = 255
+```
+
+### Output cell (2,2)
+
+```text
+255  255    0
+255  255    0
+255  255    0
+```
+
+White pixels are present.
+
+```text
+Output = 255
+```
+
+### Output cell (4,4)
+
+```text
+0  0  0
+0  0  0
+0  0  0
+```
+
+No white pixels are present.
+
+```text
+Output = 0
+```
 # Verification Results
 
 The manual results were compared with the corresponding OpenCV results using:
