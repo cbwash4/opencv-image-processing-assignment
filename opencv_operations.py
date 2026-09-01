@@ -243,6 +243,183 @@ def perform_color_intensity_operations():
     print(f"Binary shape: {binary.shape}")
     print(f"Equalized shape: {equalized.shape}")
 
+def perform_geometric_operations():
+    """
+    Perform the required Part B geometric operations.
+    """
+
+    input_path = Path("images/image_200x200.png")
+    image_output_folder = Path("outputs/geometric/images")
+    csv_output_folder = Path("outputs/geometric/csv")
+
+    image_output_folder.mkdir(parents=True, exist_ok=True)
+    csv_output_folder.mkdir(parents=True, exist_ok=True)
+
+    # Load grayscale image
+    image = cv2.imread(str(input_path), cv2.IMREAD_GRAYSCALE)
+
+    if image is None:
+        raise FileNotFoundError(
+            f"Could not load image: {input_path}"
+        )
+
+    # ---------------------------------------------------------
+    # 10. Extract center 100 x 100 region
+    # Rows 50-149 and columns 50-149
+    # ---------------------------------------------------------
+    center_crop = image[50:150, 50:150]
+
+    cv2.imwrite(
+        str(image_output_folder / "10_center_100x100.png"),
+        center_crop
+    )
+
+    save_matrix_csv(
+        center_crop,
+        csv_output_folder / "10_center_100x100.csv"
+    )
+
+    # ---------------------------------------------------------
+    # 11. Flip horizontally
+    # ---------------------------------------------------------
+    horizontal_flip = cv2.flip(image, 1)
+
+    cv2.imwrite(
+        str(image_output_folder / "11_horizontal_flip.png"),
+        horizontal_flip
+    )
+
+    save_matrix_csv(
+        horizontal_flip,
+        csv_output_folder / "11_horizontal_flip.csv"
+    )
+
+    # ---------------------------------------------------------
+    # 12. Flip vertically
+    # ---------------------------------------------------------
+    vertical_flip = cv2.flip(image, 0)
+
+    cv2.imwrite(
+        str(image_output_folder / "12_vertical_flip.png"),
+        vertical_flip
+    )
+
+    save_matrix_csv(
+        vertical_flip,
+        csv_output_folder / "12_vertical_flip.csv"
+    )
+
+    # ---------------------------------------------------------
+    # 13. Rotate 90 degrees clockwise
+    # ---------------------------------------------------------
+    rotated_90 = cv2.rotate(
+        image,
+        cv2.ROTATE_90_CLOCKWISE
+    )
+
+    cv2.imwrite(
+        str(image_output_folder / "13_rotate_90.png"),
+        rotated_90
+    )
+
+    save_matrix_csv(
+        rotated_90,
+        csv_output_folder / "13_rotate_90.csv"
+    )
+
+    # ---------------------------------------------------------
+    # 14. Rotate 30 degrees about image center
+    # ---------------------------------------------------------
+    height, width = image.shape
+    center = (width / 2, height / 2)
+
+    rotation_matrix = cv2.getRotationMatrix2D(
+        center,
+        30,
+        1.0
+    )
+
+    rotated_30 = cv2.warpAffine(
+        image,
+        rotation_matrix,
+        (width, height)
+    )
+
+    cv2.imwrite(
+        str(image_output_folder / "14_rotate_30.png"),
+        rotated_30
+    )
+
+    save_matrix_csv(
+        rotated_30,
+        csv_output_folder / "14_rotate_30.csv"
+    )
+
+    # ---------------------------------------------------------
+    # 15. Resize from 200 x 200 to 100 x 100
+    # ---------------------------------------------------------
+    resized_100 = cv2.resize(
+        image,
+        (100, 100),
+        interpolation=cv2.INTER_AREA
+    )
+
+    cv2.imwrite(
+        str(image_output_folder / "15_resize_100x100.png"),
+        resized_100
+    )
+
+    save_matrix_csv(
+        resized_100,
+        csv_output_folder / "15_resize_100x100.csv"
+    )
+
+    # ---------------------------------------------------------
+    # 16a. Resize back to 200 x 200 using nearest neighbor
+    # ---------------------------------------------------------
+    nearest = cv2.resize(
+        resized_100,
+        (200, 200),
+        interpolation=cv2.INTER_NEAREST
+    )
+
+    cv2.imwrite(
+        str(image_output_folder / "16_nearest_neighbor.png"),
+        nearest
+    )
+
+    save_matrix_csv(
+        nearest,
+        csv_output_folder / "16_nearest_neighbor.csv"
+    )
+
+    # ---------------------------------------------------------
+    # 16b. Resize back to 200 x 200 using bilinear interpolation
+    # ---------------------------------------------------------
+    bilinear = cv2.resize(
+        resized_100,
+        (200, 200),
+        interpolation=cv2.INTER_LINEAR
+    )
+
+    cv2.imwrite(
+        str(image_output_folder / "16_bilinear.png"),
+        bilinear
+    )
+
+    save_matrix_csv(
+        bilinear,
+        csv_output_folder / "16_bilinear.csv"
+    )
+
+    print("Geometric operations completed successfully.")
+    print(f"Center crop shape: {center_crop.shape}")
+    print(f"90-degree rotation shape: {rotated_90.shape}")
+    print(f"30-degree rotation shape: {rotated_30.shape}")
+    print(f"Reduced image shape: {resized_100.shape}")
+    print(f"Nearest-neighbor shape: {nearest.shape}")
+    print(f"Bilinear shape: {bilinear.shape}")
 
 if __name__ == "__main__":
     perform_color_intensity_operations()
+    perform_geometric_operations()
