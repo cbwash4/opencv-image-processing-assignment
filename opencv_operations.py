@@ -691,8 +691,133 @@ def perform_edge_detection():
     print(f"Laplacian data type: {laplacian.dtype}")
     print(f"Canny shape: {canny.shape}")
 
+def perform_morphological_operations():
+    """
+    Perform erosion, dilation, opening, and closing
+    on the binary threshold image using a 3 x 3 kernel of ones.
+    """
+
+    input_path = Path("images/image_200x200.png")
+    image_output_folder = Path("outputs/morphology/images")
+    csv_output_folder = Path("outputs/morphology/csv")
+
+    image_output_folder.mkdir(parents=True, exist_ok=True)
+    csv_output_folder.mkdir(parents=True, exist_ok=True)
+
+    # Load grayscale image
+    gray = cv2.imread(
+        str(input_path),
+        cv2.IMREAD_GRAYSCALE
+    )
+
+    if gray is None:
+        raise FileNotFoundError(
+            f"Could not load image: {input_path}"
+        )
+
+    # Create binary threshold image
+    _, binary = cv2.threshold(
+        gray,
+        127,
+        255,
+        cv2.THRESH_BINARY
+    )
+
+    # 3 x 3 kernel of ones
+    kernel = np.ones(
+        (3, 3),
+        dtype=np.uint8
+    )
+
+    # ---------------------------------------------------------
+    # 25. Erosion
+    # ---------------------------------------------------------
+    erosion = cv2.erode(
+        binary,
+        kernel,
+        iterations=1
+    )
+
+    cv2.imwrite(
+        str(image_output_folder / "25_erosion.png"),
+        erosion
+    )
+
+    save_matrix_csv(
+        erosion,
+        csv_output_folder / "25_erosion.csv"
+    )
+
+    # ---------------------------------------------------------
+    # 26. Dilation
+    # ---------------------------------------------------------
+    dilation = cv2.dilate(
+        binary,
+        kernel,
+        iterations=1
+    )
+
+    cv2.imwrite(
+        str(image_output_folder / "26_dilation.png"),
+        dilation
+    )
+
+    save_matrix_csv(
+        dilation,
+        csv_output_folder / "26_dilation.csv"
+    )
+
+    # ---------------------------------------------------------
+    # 27. Opening
+    # Erosion followed by dilation
+    # ---------------------------------------------------------
+    opening = cv2.morphologyEx(
+        binary,
+        cv2.MORPH_OPEN,
+        kernel
+    )
+
+    cv2.imwrite(
+        str(image_output_folder / "27_opening.png"),
+        opening
+    )
+
+    save_matrix_csv(
+        opening,
+        csv_output_folder / "27_opening.csv"
+    )
+
+    # ---------------------------------------------------------
+    # 28. Closing
+    # Dilation followed by erosion
+    # ---------------------------------------------------------
+    closing = cv2.morphologyEx(
+        binary,
+        cv2.MORPH_CLOSE,
+        kernel
+    )
+
+    cv2.imwrite(
+        str(image_output_folder / "28_closing.png"),
+        closing
+    )
+
+    save_matrix_csv(
+        closing,
+        csv_output_folder / "28_closing.csv"
+    )
+
+    print("Morphological operations completed successfully.")
+    print(f"Binary shape: {binary.shape}")
+    print(f"Kernel shape: {kernel.shape}")
+    print(f"Erosion shape: {erosion.shape}")
+    print(f"Dilation shape: {dilation.shape}")
+    print(f"Opening shape: {opening.shape}")
+    print(f"Closing shape: {closing.shape}")
+
 if __name__ == "__main__":
     perform_color_intensity_operations()
     perform_geometric_operations()
     perform_spatial_filtering()
     perform_edge_detection()
+    perform_morphological_operations()
