@@ -524,7 +524,175 @@ def perform_spatial_filtering():
     print(f"Gaussian-filtered shape: {gaussian_filtered.shape}")
     print(f"Median-filtered shape: {median_filtered.shape}")
 
+def perform_edge_detection():
+    """
+    Perform Sobel, gradient magnitude, Laplacian,
+    and Canny edge-detection operations.
+    """
+
+    input_path = Path("images/image_200x200.png")
+    image_output_folder = Path("outputs/edges/images")
+    csv_output_folder = Path("outputs/edges/csv")
+
+    image_output_folder.mkdir(parents=True, exist_ok=True)
+    csv_output_folder.mkdir(parents=True, exist_ok=True)
+
+    # Load grayscale image
+    gray = cv2.imread(
+        str(input_path),
+        cv2.IMREAD_GRAYSCALE
+    )
+
+    if gray is None:
+        raise FileNotFoundError(
+            f"Could not load image: {input_path}"
+        )
+
+    # ---------------------------------------------------------
+    # 20. Sobel operator in horizontal (x) direction
+    #
+    # Gx =
+    # [-1  0  1
+    #  -2  0  2
+    #  -1  0  1]
+    #
+    # CV_64F preserves positive and negative gradients.
+    # ---------------------------------------------------------
+    sobel_x = cv2.Sobel(
+        gray,
+        cv2.CV_64F,
+        1,
+        0,
+        ksize=3
+    )
+
+    save_matrix_csv(
+        sobel_x,
+        csv_output_folder / "20_sobel_x.csv"
+    )
+
+    # Absolute-value image is used only for visualization.
+    sobel_x_visual = cv2.convertScaleAbs(sobel_x)
+
+    cv2.imwrite(
+        str(image_output_folder / "20_sobel_x.png"),
+        sobel_x_visual
+    )
+
+    # ---------------------------------------------------------
+    # 21. Sobel operator in vertical (y) direction
+    #
+    # Gy =
+    # [-1 -2 -1
+    #   0  0  0
+    #   1  2  1]
+    # ---------------------------------------------------------
+    sobel_y = cv2.Sobel(
+        gray,
+        cv2.CV_64F,
+        0,
+        1,
+        ksize=3
+    )
+
+    save_matrix_csv(
+        sobel_y,
+        csv_output_folder / "21_sobel_y.csv"
+    )
+
+    sobel_y_visual = cv2.convertScaleAbs(sobel_y)
+
+    cv2.imwrite(
+        str(image_output_folder / "21_sobel_y.png"),
+        sobel_y_visual
+    )
+
+    # ---------------------------------------------------------
+    # 22. Sobel gradient magnitude
+    #
+    # G = sqrt(Gx^2 + Gy^2)
+    # ---------------------------------------------------------
+    gradient_magnitude = np.sqrt(
+        sobel_x ** 2 + sobel_y ** 2
+    )
+
+    save_matrix_csv(
+        gradient_magnitude,
+        csv_output_folder / "22_gradient_magnitude.csv"
+    )
+
+    # Normalize only for the PNG visualization.
+    gradient_visual = cv2.normalize(
+        gradient_magnitude,
+        None,
+        0,
+        255,
+        cv2.NORM_MINMAX
+    ).astype(np.uint8)
+
+    cv2.imwrite(
+        str(image_output_folder / "22_gradient_magnitude.png"),
+        gradient_visual
+    )
+
+    # ---------------------------------------------------------
+    # 23. Laplacian operator
+    #
+    # CV_64F preserves negative second-derivative values.
+    # ---------------------------------------------------------
+    laplacian = cv2.Laplacian(
+        gray,
+        cv2.CV_64F,
+        ksize=3
+    )
+
+    save_matrix_csv(
+        laplacian,
+        csv_output_folder / "23_laplacian.csv"
+    )
+
+    laplacian_visual = cv2.convertScaleAbs(laplacian)
+
+    cv2.imwrite(
+        str(image_output_folder / "23_laplacian.png"),
+        laplacian_visual
+    )
+
+    # ---------------------------------------------------------
+    # 24. Canny edge detection
+    #
+    # Lower threshold = 100
+    # Upper threshold = 200
+    # ---------------------------------------------------------
+    canny = cv2.Canny(
+        gray,
+        100,
+        200
+    )
+
+    cv2.imwrite(
+        str(image_output_folder / "24_canny.png"),
+        canny
+    )
+
+    save_matrix_csv(
+        canny,
+        csv_output_folder / "24_canny.csv"
+    )
+
+    print("Edge-detection operations completed successfully.")
+    print(f"Sobel X data type: {sobel_x.dtype}")
+    print(f"Sobel X minimum: {sobel_x.min()}")
+    print(f"Sobel X maximum: {sobel_x.max()}")
+    print(f"Sobel Y data type: {sobel_y.dtype}")
+    print(f"Sobel Y minimum: {sobel_y.min()}")
+    print(f"Sobel Y maximum: {sobel_y.max()}")
+    print(f"Gradient magnitude shape: {gradient_magnitude.shape}")
+    print(f"Laplacian data type: {laplacian.dtype}")
+    print(f"Canny shape: {canny.shape}")
+
 if __name__ == "__main__":
     perform_color_intensity_operations()
     perform_geometric_operations()
     perform_spatial_filtering()
+    perform_edge_detection()
