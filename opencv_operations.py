@@ -420,6 +420,111 @@ def perform_geometric_operations():
     print(f"Nearest-neighbor shape: {nearest.shape}")
     print(f"Bilinear shape: {bilinear.shape}")
 
+def perform_spatial_filtering():
+    """
+    Perform the required Part B spatial filtering operations:
+    3 x 3 mean, Gaussian, and median filters.
+    """
+
+    input_path = Path("images/image_200x200.png")
+    image_output_folder = Path("outputs/filtering/images")
+    csv_output_folder = Path("outputs/filtering/csv")
+
+    # Automatically create output folders
+    image_output_folder.mkdir(parents=True, exist_ok=True)
+    csv_output_folder.mkdir(parents=True, exist_ok=True)
+
+    # Load the image as grayscale
+    gray = cv2.imread(
+        str(input_path),
+        cv2.IMREAD_GRAYSCALE
+    )
+
+    if gray is None:
+        raise FileNotFoundError(
+            f"Could not load image: {input_path}"
+        )
+
+    # ---------------------------------------------------------
+    # 17. Apply a 3 x 3 mean (box) filter
+    #
+    # Kernel:
+    #
+    #       1  1  1
+    # 1/9 [ 1  1  1 ]
+    #       1  1  1
+    # ---------------------------------------------------------
+    mean_filtered = cv2.blur(
+        gray,
+        (3, 3)
+    )
+
+    cv2.imwrite(
+        str(image_output_folder / "17_mean_filter.png"),
+        mean_filtered
+    )
+
+    save_matrix_csv(
+        mean_filtered,
+        csv_output_folder / "17_mean_filter.csv"
+    )
+
+    # ---------------------------------------------------------
+    # 18. Apply a 3 x 3 Gaussian filter
+    #
+    # Required manual kernel:
+    #
+    # 1/16 [1  2  1
+    #       2  4  2
+    #       1  2  1]
+    #
+    # sigmaX = 0 allows OpenCV to determine sigma from
+    # the specified 3 x 3 kernel size.
+    # ---------------------------------------------------------
+    gaussian_filtered = cv2.GaussianBlur(
+        gray,
+        (3, 3),
+        sigmaX=0
+    )
+
+    cv2.imwrite(
+        str(image_output_folder / "18_gaussian_filter.png"),
+        gaussian_filtered
+    )
+
+    save_matrix_csv(
+        gaussian_filtered,
+        csv_output_folder / "18_gaussian_filter.csv"
+    )
+
+    # ---------------------------------------------------------
+    # 19. Apply a 3 x 3 median filter
+    #
+    # The output pixel is the median of the nine values
+    # in its 3 x 3 neighborhood.
+    # ---------------------------------------------------------
+    median_filtered = cv2.medianBlur(
+        gray,
+        3
+    )
+
+    cv2.imwrite(
+        str(image_output_folder / "19_median_filter.png"),
+        median_filtered
+    )
+
+    save_matrix_csv(
+        median_filtered,
+        csv_output_folder / "19_median_filter.csv"
+    )
+
+    print("Spatial filtering operations completed successfully.")
+    print(f"Original grayscale shape: {gray.shape}")
+    print(f"Mean-filtered shape: {mean_filtered.shape}")
+    print(f"Gaussian-filtered shape: {gaussian_filtered.shape}")
+    print(f"Median-filtered shape: {median_filtered.shape}")
+
 if __name__ == "__main__":
     perform_color_intensity_operations()
     perform_geometric_operations()
+    perform_spatial_filtering()
