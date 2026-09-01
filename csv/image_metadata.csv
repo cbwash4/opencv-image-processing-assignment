@@ -1,0 +1,7 @@
+property,value
+shape,"(200, 200, 3)"
+data_type,uint8
+minimum_pixel_value,0
+maximum_pixel_value,255
+mean_pixel_value,118.06869166666667
+standard_deviation,64.2744505210917

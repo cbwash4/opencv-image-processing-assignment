@@ -1,0 +1,15 @@
+operation,rows,columns,max_absolute_difference,mean_absolute_difference,exact_matching_cells,total_cells,exact_match_percentage
+op01_grayscale,5,1,0.0,0.0,5,5,100.0
+op02_negative,7,7,0.0,0.0,49,49,100.0
+op03_brightness,7,7,0.0,0.0,49,49,100.0
+op04_contrast,7,7,0.0,0.0,49,49,100.0
+op05_threshold,7,7,0.0,0.0,49,49,100.0
+op06_horizontal_flip,7,7,0.0,0.0,49,49,100.0
+op07_mean,5,5,0.0,0.0,25,25,100.0
+op08_gaussian,5,5,1.0,0.04,24,25,96.0
+op09_median,5,5,0.0,0.0,25,25,100.0
+op10_sobel_gx,5,5,0.0,0.0,25,25,100.0
+op11_sobel_gy,5,5,0.0,0.0,25,25,100.0
+op12_gradient_magnitude,5,5,0.0,0.0,25,25,100.0
+op13_erosion,5,5,0.0,0.0,25,25,100.0
+op14_dilation,5,5,0.0,0.0,25,25,100.0
