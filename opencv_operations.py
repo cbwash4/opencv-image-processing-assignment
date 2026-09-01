@@ -814,6 +814,198 @@ def perform_morphological_operations():
     print(f"Dilation shape: {dilation.shape}")
     print(f"Opening shape: {opening.shape}")
     print(f"Closing shape: {closing.shape}")
+def perform_contour_analysis():
+    """
+    Detect contours, create a contour mask,
+    draw all contours, and measure the largest contour.
+    """
+
+    input_path = Path("images/image_200x200.png")
+    image_output_folder = Path("outputs/contours/images")
+    csv_output_folder = Path("outputs/contours/csv")
+
+    image_output_folder.mkdir(parents=True, exist_ok=True)
+    csv_output_folder.mkdir(parents=True, exist_ok=True)
+
+    # Load original color image
+    image = cv2.imread(str(input_path))
+
+    if image is None:
+        raise FileNotFoundError(
+            f"Could not load image: {input_path}"
+        )
+
+    # Convert to grayscale
+    gray = cv2.cvtColor(
+        image,
+        cv2.COLOR_BGR2GRAY
+    )
+
+    # Use the required binary threshold image
+    _, binary = cv2.threshold(
+        gray,
+        127,
+        255,
+        cv2.THRESH_BINARY
+    )
+
+    # ---------------------------------------------------------
+    # 29. Detect contours
+    # ---------------------------------------------------------
+    contours, hierarchy = cv2.findContours(
+        binary,
+        cv2.RETR_EXTERNAL,
+        cv2.CHAIN_APPROX_SIMPLE
+    )
+
+    # ---------------------------------------------------------
+    # 30. Create contour mask
+    # ---------------------------------------------------------
+    contour_mask = np.zeros_like(gray)
+
+    cv2.drawContours(
+        contour_mask,
+        contours,
+        -1,
+        255,
+        thickness=1
+    )
+
+    cv2.imwrite(
+        str(image_output_folder / "30_contour_mask.png"),
+        contour_mask
+    )
+
+    save_matrix_csv(
+        contour_mask,
+        csv_output_folder / "30_contour_mask.csv"
+    )
+
+    # ---------------------------------------------------------
+    # 31. Draw all contours on original image
+    # ---------------------------------------------------------
+    all_contours_image = image.copy()
+
+    cv2.drawContours(
+        all_contours_image,
+        contours,
+        -1,
+        (0, 255, 0),
+        thickness=1
+    )
+
+    cv2.imwrite(
+        str(image_output_folder / "31_all_contours.png"),
+        all_contours_image
+    )
+
+    # ---------------------------------------------------------
+    # 32. Largest contour measurements
+    # ---------------------------------------------------------
+    if len(contours) == 0:
+        print("No contours were detected.")
+        return
+
+    largest_contour = max(
+        contours,
+        key=cv2.contourArea
+    )
+
+    area = cv2.contourArea(largest_contour)
+
+    perimeter = cv2.arcLength(
+        largest_contour,
+        True
+    )
+
+    x, y, width, height = cv2.boundingRect(
+        largest_contour
+    )
+
+    # Calculate centroid using image moments
+    moments = cv2.moments(largest_contour)
+
+    if moments["m00"] != 0:
+        centroid_x = moments["m10"] / moments["m00"]
+        centroid_y = moments["m01"] / moments["m00"]
+    else:
+        centroid_x = np.nan
+        centroid_y = np.nan
+
+    # Save largest contour measurements
+    measurements = pd.DataFrame({
+        "measurement": [
+            "contour_area",
+            "perimeter",
+            "bounding_box_x",
+            "bounding_box_y",
+            "bounding_box_width",
+            "bounding_box_height",
+            "centroid_x",
+            "centroid_y"
+        ],
+        "value": [
+            area,
+            perimeter,
+            x,
+            y,
+            width,
+            height,
+            centroid_x,
+            centroid_y
+        ]
+    })
+
+    measurements.to_csv(
+        csv_output_folder / "contour_measurements.csv",
+        index=False
+    )
+
+    # Draw the largest contour and its bounding box
+    largest_contour_image = image.copy()
+
+    cv2.drawContours(
+        largest_contour_image,
+        [largest_contour],
+        -1,
+        (0, 255, 0),
+        thickness=2
+    )
+
+    cv2.rectangle(
+        largest_contour_image,
+        (x, y),
+        (x + width, y + height),
+        (255, 0, 0),
+        thickness=1
+    )
+
+    # Draw centroid if it exists
+    if not np.isnan(centroid_x) and not np.isnan(centroid_y):
+        cv2.circle(
+            largest_contour_image,
+            (int(round(centroid_x)), int(round(centroid_y))),
+            3,
+            (0, 0, 255),
+            thickness=-1
+        )
+
+    cv2.imwrite(
+        str(image_output_folder / "32_largest_contour.png"),
+        largest_contour_image
+    )
+
+    print("Contour analysis completed successfully.")
+    print(f"Number of contours detected: {len(contours)}")
+    print(f"Largest contour area: {area}")
+    print(f"Largest contour perimeter: {perimeter}")
+    print(f"Bounding box x: {x}")
+    print(f"Bounding box y: {y}")
+    print(f"Bounding box width: {width}")
+    print(f"Bounding box height: {height}")
+    print(f"Centroid x: {centroid_x}")
+    print(f"Centroid y: {centroid_y}")
+
 
 if __name__ == "__main__":
     perform_color_intensity_operations()
@@ -821,3 +1013,4 @@ if __name__ == "__main__":
     perform_spatial_filtering()
     perform_edge_detection()
     perform_morphological_operations()
+    perform_contour_analysis()
