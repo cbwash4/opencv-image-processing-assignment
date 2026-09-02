@@ -2,7 +2,7 @@
 
 ## Graduate Computer Vision Assignment
 
-This project implements fundamental image-processing operations using Python, OpenCV, NumPy, Pandas, and Matplotlib. I used the same personally captured photograph throughout the assignment. The project includes image preparation, OpenCV image-processing operations, manual matrix calculations, and numerical verification of the manual results.
+This project uses image-processing operations - Python, OpenCV, NumPy, Pandas, and Matplotlib. I used the same iPhone selfie image throughout the assignment. The project includes image preparation, OpenCV image-processing operations, manual matrix calculations, and numerical verification of the manual results.
 
 ---
 
@@ -25,68 +25,158 @@ This project implements fundamental image-processing operations using Python, Op
 
 ## Original Image
 
-I used the same personally captured photograph throughout the assignment.
+I used the same iPhone selfie photo for the entire assignment.
 
-The original image was loaded using OpenCV. Its dimensions were:
+### Original Photograph
+
+![Original photograph](input/original_photo.png)
+
+The original image was loaded using OpenCV.
+
+Original image dimensions:
 
 - Width: 818 pixels
 - Height: 1101 pixels
 - Channels: 3
 - Data type: uint8
 
-I center-cropped the original photograph to a square and then resized the square image to 200 × 200 pixels.
+Because the original photograph was rectangular, I first center-cropped it to a square before resizing it. This prevented the image from being stretched or distorted when it was resized to 200 × 200 pixels.
 
-The final image dimensions were:
+## Square Crop
+
+![Square-cropped photograph](images/cropped_square.png)
+
+The square crop preserved the center portion of the original photograph while removing the excess height.
+
+## Final 200 × 200 Image
+
+![Final 200 x 200 photograph](images/image_200x200.png)
+
+The square image was resized to exactly 200 × 200 pixels for the remaining parts of the assignment.
+
+Final image dimensions:
 
 - Width: 200 pixels
 - Height: 200 pixels
 - Channels: 3
+- Shape: (200, 200, 3)
 - Data type: uint8
 
-The square crop and final 200 × 200 image are stored in the images/ folder.
+The same final 200 × 200 image was used throughout the OpenCV processing operations.
+
+---
 
 ## Image Metadata
 
-The final image has the following properties:
+The final 200 × 200 image had the following numerical properties:
 
-- Shape: (200, 200, 3)
-- Data type: uint8
 - Minimum pixel value: 0
 - Maximum pixel value: 255
 - Mean pixel value: approximately 118.07
 - Standard deviation: approximately 64.27
 
-The metadata and numerical image matrices are stored as CSV files in the csv/ folder.
+The numerical image matrices and metadata are stored in the csv/ folder.
+
+---
 
 ## BGR and RGB Channel Ordering
 
 OpenCV loads color images using BGR channel ordering rather than RGB ordering.
 
-BGR represents the channels in this order:
+BGR stores the channels in this order:
 
-```text
-Blue, Green, Red
+Blue → Green → Red
 
----
+RGB stores the channels in this order:
 
+Red → Green → Blue
+
+This distinction is important when displaying an OpenCV image using a library such as Matplotlib. OpenCV reads the image in BGR order, while Matplotlib normally expects RGB order. If the channels are not converted before displaying the image with Matplotlib, the red and blue colors will appear reversed.
+
+For this assignment, the blue, green, and red channels were separated from the OpenCV BGR image. The three channels were also merged back together in BGR order to reconstruct the color image.
 # Part B — OpenCV Image Processing
 
-The required image-processing operations were performed using OpenCV. Unless otherwise noted, the operations use the prepared 200 × 200 image or its 200 × 200 grayscale version. Numerical outputs are stored as CSV files in outputs/, and the corresponding processed images are also included in outputs/.
+I performed the required image-processing operations using OpenCV. The operations use 200 × 200 image or 200 × 200 grayscale version. The numerical matrices are stored as CSV files in the outputs/ folder along with the corresponding processed images.
 
 ## Color and Intensity Operations
 
-| Operation | Purpose | OpenCV Function | Important Parameters | Output Size | Observation |
-|---|---|---|---|---|---|
-| Grayscale | Convert the color image to one intensity channel | cv2.cvtColor | COLOR_BGR2GRAY | 200 × 200 | Color information is removed while image structure and intensity differences remain visible. |
-| Blue channel | Isolate the blue component | Channel indexing | BGR channel 0 | 200 × 200 | Shows the contribution of the blue channel to the original image. |
-| Green channel | Isolate the green component | Channel indexing | BGR channel 1 | 200 × 200 | Shows the contribution of the green channel to the original image. |
-| Red channel | Isolate the red component | Channel indexing | BGR channel 2 | 200 × 200 | Shows the contribution of the red channel to the original image. |
-| BGR reconstruction | Recombine the three separated channels | cv2.merge | Blue, green, red channels | 200 × 200 × 3 | Reconstructing the channels in BGR order reproduces the color image. |
-| Negative | Invert pixel intensities | cv2.bitwise_not | 8-bit input | 200 × 200 | Bright regions become dark and dark regions become bright. |
-| Brightness +40 | Increase image intensity | cv2.add | +40, clipped to 255 | 200 × 200 | The image becomes brighter and high values saturate at 255. |
-| Contrast ×1.25 | Increase differences between intensity values | cv2.convertScaleAbs | alpha = 1.25, beta = 0 | 200 × 200 | Intensity differences become stronger while values remain within the 8-bit range. |
-| Binary threshold | Separate pixels into black and white regions | cv2.threshold | threshold = 127, max = 255 | 200 × 200 | The grayscale image is reduced to two intensity values, 0 and 255. |
-| Histogram equalization | Redistribute grayscale intensities | cv2.equalizeHist | Grayscale input | 200 × 200 | The intensity distribution is changed to improve contrast. |
+### Grayscale
+
+Purpose: Convert the color image to a single intensity channel.
+
+OpenCV function: cv2.cvtColor  
+Parameters: cv2.COLOR_BGR2GRAY  
+Output dimensions: 200 × 200
+
+The grayscale image removes the color information while preserving the overall intensity differences and image structure.
+
+### Blue, Green, and Red Channels
+
+Purpose: Separate the individual color channels of the image.
+
+OpenCV method: BGR channel indexing  
+Parameters: Blue = channel 0, Green = channel 1, Red = channel 2  
+Output dimensions: 200 × 200 for each channel
+
+OpenCV stores the image in BGR order. Separating the channels makes it possible to examine the contribution of each color component individually.
+
+### BGR Reconstruction
+
+Purpose: Reconstruct the color image from the separated blue, green, and red channels.
+
+OpenCV function: cv2.merge  
+Parameters: Blue, Green, and Red channels  
+Output dimensions: 200 × 200 × 3
+
+Merging the three channels in BGR order reconstructs the original color representation.
+
+### Negative
+
+Purpose: Invert the image intensities.
+
+OpenCV function: cv2.bitwise_not  
+Output dimensions: 200 × 200
+
+The negative transformation reverses the intensity values so that bright areas become dark and dark areas become bright.
+
+### Brightness Increase
+
+Purpose: Increase the brightness of the image.
+
+OpenCV function: cv2.add  
+Parameter: +40 intensity units  
+Output dimensions: 200 × 200
+
+Adding 40 increases the grayscale intensity values. Values that would exceed the maximum 8-bit value are limited to 255.
+
+### Contrast Increase
+
+Purpose: Increase the difference between intensity values.
+
+OpenCV function: cv2.convertScaleAbs  
+Parameters: alpha = 1.25, beta = 0  
+Output dimensions: 200 × 200
+
+Multiplying the intensity values by 1.25 increases contrast. Larger intensity differences become more noticeable while the output remains within the 8-bit range.
+
+### Binary Threshold
+
+Purpose: Convert the grayscale image to a binary image.
+
+OpenCV function: cv2.threshold  
+Parameters: threshold = 127, maximum value = 255  
+Output dimensions: 200 × 200
+
+Pixels above the threshold are assigned 255 and pixels at or below the threshold are assigned 0. The resulting image therefore contains only black and white pixels.
+
+### Histogram Equalization
+
+Purpose: Improve grayscale contrast by redistributing intensity values.
+
+OpenCV function: cv2.equalizeHist  
+Output dimensions: 200 × 200
+
+Histogram equalization changes the intensity distribution and increases contrast in portions of the image where intensity values were concentrated within a smaller range.
 
 The original and equalized histograms are stored in outputs/color_intensity/histograms/.
 
@@ -94,48 +184,179 @@ The original and equalized histograms are stored in outputs/color_intensity/hist
 
 ## Geometric Operations
 
-| Operation | Purpose | OpenCV Function | Important Parameters | Output Size | Observation |
-|---|---|---|---|---|---|
-| Center crop | Extract the center region | Array slicing | 100 × 100 center region | 100 × 100 | Only the center portion of the image is retained. |
-| Horizontal flip | Reverse the image left-to-right | cv2.flip | flipCode = 1 | 200 × 200 | Left and right positions are reversed. |
-| Vertical flip | Reverse the image top-to-bottom | cv2.flip | flipCode = 0 | 200 × 200 | Top and bottom positions are reversed. |
-| 90° clockwise rotation | Rotate the image by a right angle | cv2.rotate | ROTATE_90_CLOCKWISE | 200 × 200 | Image orientation changes without changing its dimensions. |
-| 30° rotation | Rotate about the image center | cv2.getRotationMatrix2D and cv2.warpAffine | angle = -30° | 200 × 200 | The image is rotated while maintaining the original output dimensions. |
-| Resize to 100 × 100 | Reduce spatial resolution | cv2.resize | size = 100 × 100 | 100 × 100 | The image contains fewer pixels and therefore less spatial detail. |
-| Nearest-neighbor resize | Enlarge the reduced image | cv2.resize | INTER_NEAREST | 200 × 200 | The enlarged image has more visible pixel boundaries and appears more blocky. |
-| Bilinear resize | Enlarge using neighboring pixel values | cv2.resize | INTER_LINEAR | 200 × 200 | The enlarged image appears smoother than the nearest-neighbor result. |
+### Center Crop
+
+Purpose: Extract the center portion of the image.
+
+Method: NumPy array slicing  
+Parameters: 100 × 100 center region  
+Output dimensions: 100 × 100
+
+The crop retains only the center region of the original 200 × 200 image.
+
+### Horizontal Flip
+
+Purpose: Reverse the image from left to right.
+
+OpenCV function: cv2.flip  
+Parameter: flipCode = 1  
+Output dimensions: 200 × 200
+
+The horizontal flip reverses the left and right positions of the image pixels.
+
+### Vertical Flip
+
+Purpose: Reverse the image from top to bottom.
+
+OpenCV function: cv2.flip  
+Parameter: flipCode = 0  
+Output dimensions: 200 × 200
+
+The vertical flip reverses the top and bottom positions of the image pixels.
+
+### 90° Clockwise Rotation
+
+Purpose: Rotate the image 90 degrees clockwise.
+
+OpenCV function: cv2.rotate  
+Parameter: cv2.ROTATE_90_CLOCKWISE  
+Output dimensions: 200 × 200
+
+Because the input image is square, rotating it 90 degrees changes its orientation without changing its dimensions.
+
+### 30° Counterclockwise Rotation
+
+Purpose: Rotate the image about its center.
+
+OpenCV functions: cv2.getRotationMatrix2D and cv2.warpAffine  
+Parameters: angle = 30°, scale = 1.0  
+Output dimensions: 200 × 200
+
+A rotation matrix was created around the center of the image and applied using an affine transformation. The output canvas remains 200 × 200.
+
+### Resize to 100 × 100
+
+Purpose: Reduce the spatial resolution of the image.
+
+OpenCV function: cv2.resize  
+Parameters: size = 100 × 100, interpolation = cv2.INTER_AREA  
+Output dimensions: 100 × 100
+
+Reducing the image dimensions decreases the number of pixels available to represent image detail.
+
+### Nearest-Neighbor Interpolation
+
+Purpose: Resize the 100 × 100 image back to 200 × 200 using nearest-neighbor interpolation.
+
+OpenCV function: cv2.resize  
+Parameter: interpolation = cv2.INTER_NEAREST  
+Output dimensions: 200 × 200
+
+Nearest-neighbor interpolation copies the value of the nearest source pixel. The enlarged image therefore has more visible pixel boundaries and appears more blocky.
+
+### Bilinear Interpolation
+
+Purpose: Resize the 100 × 100 image back to 200 × 200 using bilinear interpolation.
+
+OpenCV function: cv2.resize  
+Parameter: interpolation = cv2.INTER_LINEAR  
+Output dimensions: 200 × 200
+
+Bilinear interpolation estimates new values using neighboring pixels, producing a smoother result than nearest-neighbor interpolation.
 
 ---
 
 ## Spatial Filtering
 
-| Operation | Purpose | OpenCV Function | Important Parameters | Output Size | Observation |
-|---|---|---|---|---|---|
-| Mean filter | Smooth local intensity variation | cv2.blur | 3 × 3 kernel | 200 × 200 | Averaging reduces local variation but also softens image detail. |
-| Gaussian filter | Perform weighted smoothing | cv2.GaussianBlur | 3 × 3 Gaussian kernel | 200 × 200 | Produces smoothing while weighting pixels near the center more heavily. |
-| Median filter | Replace each pixel with the neighborhood median | cv2.medianBlur | kernel size = 3 | 200 × 200 | Reduces isolated intensity variations while preserving edges better than simple averaging in many areas. |
+### Mean Filter
 
-The Gaussian kernel used was:
+Purpose: Smooth local intensity variations.
 
-```text
-1/16 ×
+OpenCV function: cv2.blur  
+Parameter: 3 × 3 kernel  
+Output dimensions: 200 × 200
 
-1  2  1
-2  4  2
-1  2  1
-```
+The mean filter replaces each pixel with an average of its neighborhood. This reduces local intensity variation but also softens image details.
+
+### Gaussian Filter
+
+Purpose: Smooth the image using a weighted neighborhood.
+
+OpenCV function: cv2.GaussianBlur  
+Parameter: 3 × 3 Gaussian kernel  
+Output dimensions: 200 × 200
+
+Unlike the mean filter, the Gaussian filter gives greater weight to pixels near the center of the neighborhood. The result is a smoother image with less uniform averaging.
+
+The 3 × 3 Gaussian kernel used for the manual calculation was:
+
+1 &nbsp;&nbsp; 2 &nbsp;&nbsp; 1  
+2 &nbsp;&nbsp; 4 &nbsp;&nbsp; 2  
+1 &nbsp;&nbsp; 2 &nbsp;&nbsp; 1  
+
+with a scale factor of 1/16.
+
+### Median Filter
+
+Purpose: Smooth the image using the median neighborhood intensity.
+
+OpenCV function: cv2.medianBlur  
+Parameter: kernel size = 3  
+Output dimensions: 200 × 200
+
+The median filter replaces each pixel with the median of its neighborhood. It reduces isolated intensity variations while preserving edges better than simple averaging in many regions.
 
 ---
 
 ## Edge Detection
 
-| Operation | Purpose | OpenCV Function | Important Parameters | Output Size | Observation |
-|---|---|---|---|---|---|
-| Sobel X | Measure horizontal intensity change | cv2.Sobel | dx = 1, dy = 0, ksize = 3 | 200 × 200 | Emphasizes vertical edge structure. |
-| Sobel Y | Measure vertical intensity change | cv2.Sobel | dx = 0, dy = 1, ksize = 3 | 200 × 200 | Emphasizes horizontal edge structure. |
-| Gradient magnitude | Combine Gx and Gy edge strength | NumPy calculation | sqrt(Gx² + Gy²) | 200 × 200 | Represents overall edge strength independent of direction. |
-| Laplacian | Detect rapid intensity changes | cv2.Laplacian | floating-point output | 200 × 200 | Responds to intensity changes in multiple directions. |
-| Canny | Produce a binary edge map | cv2.Canny | lower threshold = 100, upper threshold = 200 | 200 × 200 | Produces a more selective representation of prominent edges. |
+### Sobel X
+
+Purpose: Measure intensity changes in the x direction.
+
+OpenCV function: cv2.Sobel  
+Parameters: dx = 1, dy = 0, kernel size = 3  
+Output dimensions: 200 × 200
+
+Sobel X responds strongly to horizontal changes in intensity and therefore emphasizes vertical edge structures.
+
+### Sobel Y
+
+Purpose: Measure intensity changes in the y direction.
+
+OpenCV function: cv2.Sobel  
+Parameters: dx = 0, dy = 1, kernel size = 3  
+Output dimensions: 200 × 200
+
+Sobel Y responds strongly to vertical changes in intensity and therefore emphasizes horizontal edge structures.
+
+### Gradient Magnitude
+
+Purpose: Combine the Sobel X and Sobel Y responses into an overall measure of edge strength.
+
+Calculation: √(Gx² + Gy²)  
+Output dimensions: 200 × 200
+
+The gradient magnitude represents edge strength regardless of whether the intensity change occurs primarily in the x or y direction.
+
+### Laplacian
+
+Purpose: Detect rapid changes in image intensity.
+
+OpenCV function: cv2.Laplacian  
+Output dimensions: 200 × 200
+
+The Laplacian responds to intensity changes in multiple directions and highlights regions where the image intensity changes rapidly.
+
+### Canny Edge Detection
+
+Purpose: Produce a binary map of prominent edges.
+
+OpenCV function: cv2.Canny  
+Parameters: lower threshold = 100, upper threshold = 200  
+Output dimensions: 200 × 200
+
+Canny edge detection produces a more selective edge representation by using the two threshold values to determine which edge responses are retained.
 
 Sobel and Laplacian calculations were retained using signed or floating-point data so that negative gradient responses were not lost.
 
@@ -145,42 +366,64 @@ Sobel and Laplacian calculations were retained using signed or floating-point da
 
 The morphological operations were performed on the binary threshold image using a 3 × 3 kernel of ones.
 
-| Operation | Purpose | OpenCV Function | Important Parameters | Output Size | Observation |
-|---|---|---|---|---|---|
-| Erosion | Shrink white foreground regions | cv2.erode | 3 × 3 kernel, 1 iteration | 200 × 200 | White regions become smaller. |
-| Dilation | Expand white foreground regions | cv2.dilate | 3 × 3 kernel, 1 iteration | 200 × 200 | White regions become larger. |
-| Opening | Perform erosion followed by dilation | cv2.morphologyEx | MORPH_OPEN, 3 × 3 kernel | 200 × 200 | Small foreground features can be removed while larger regions remain. |
-| Closing | Perform dilation followed by erosion | cv2.morphologyEx | MORPH_CLOSE, 3 × 3 kernel | 200 × 200 | Small gaps within foreground regions can be reduced or closed. |
+### Erosion
+
+Purpose: Shrink white foreground regions.
+
+OpenCV function: cv2.erode  
+Parameters: 3 × 3 kernel, 1 iteration  
+Output dimensions: 200 × 200
+
+Erosion removes foreground pixels along region boundaries, causing the white regions to become smaller.
+
+### Dilation
+
+Purpose: Expand white foreground regions.
+
+OpenCV function: cv2.dilate  
+Parameters: 3 × 3 kernel, 1 iteration  
+Output dimensions: 200 × 200
+
+Dilation adds foreground pixels along region boundaries, causing the white regions to become larger.
+
+### Opening
+
+Purpose: Perform erosion followed by dilation.
+
+OpenCV function: cv2.morphologyEx  
+Parameters: cv2.MORPH_OPEN, 3 × 3 kernel  
+Output dimensions: 200 × 200
+
+Opening can remove small foreground features while preserving larger foreground regions.
+
+### Closing
+
+Purpose: Perform dilation followed by erosion.
+
+OpenCV function: cv2.morphologyEx  
+Parameters: cv2.MORPH_CLOSE, 3 × 3 kernel  
+Output dimensions: 200 × 200
+
+Closing can reduce small gaps or holes within foreground regions.
 
 ---
 
 ## Contour Analysis
 
-Contours were detected from the binary image using OpenCV.
+Contours were detected from the binary image using OpenCV. The program generated a binary contour mask, an image showing all detected contours, an image showing the largest contour, and a CSV file containing contour measurements.
 
-The following outputs were generated:
-
-- Binary contour mask
-- Image containing all detected contours
-- Image containing the largest contour
-- CSV file containing measurements for the detected contours
-
-A total of 99 contours were detected.
+A total of **99 contours** were detected.
 
 For the largest contour:
 
-| Measurement | Result |
-|---|---:|
-| Area | 9268.5 |
-| Perimeter | 480.98 |
-| Bounding box x | 62 |
-| Bounding box y | 96 |
-| Bounding box width | 138 |
-| Bounding box height | 104 |
-| Centroid x | 143.95 |
-| Centroid y | 159.44 |
-
-The largest contour identifies the largest connected boundary detected in the thresholded image. Its area and perimeter describe its size, the bounding rectangle identifies its spatial extent, and the centroid represents its approximate geometric center.
+- Area: 9268.5
+- Perimeter: 480.98
+- Bounding box x-coordinate: 62
+- Bounding box y-coordinate: 96
+- Bounding box width: 138
+- Bounding box height: 104
+- Centroid x-coordinate: approximately 143.95
+- Centroid y-coordinate: approximately 159.44
 ---
 
 # Part C — Manual Matrix Calculations
@@ -653,47 +896,39 @@ Manual result: 32
 
 Kernel:
 
-```text
--1   0   1
--2   0   2
--1   0   1
-```
+-1 &nbsp;&nbsp; 0 &nbsp;&nbsp; 1  
+-2 &nbsp;&nbsp; 0 &nbsp;&nbsp; 2  
+-1 &nbsp;&nbsp; 0 &nbsp;&nbsp; 1  
 
 ### Output cell (0,0)
 
-```text
-(-1)(236) + (0)(242) + (1)(231)
-+ (-2)(239) + (0)(239) + (2)(227)
-+ (-1)(238) + (0)(225) + (1)(227)
+(-1)(236) + (0)(242) + (1)(231)  
++ (-2)(239) + (0)(239) + (2)(227)  
++ (-1)(238) + (0)(225) + (1)(227)  
 
 = -40
-```
 
-Manual result: -40
+Manual result: **-40**
 
 ### Output cell (2,2)
 
-```text
-(-1)(227) + (0)(234) + (1)(100)
-+ (-2)(233) + (0)(198) + (2)(46)
-+ (-1)(238) + (0)(138) + (1)(32)
+(-1)(227) + (0)(234) + (1)(100)  
++ (-2)(233) + (0)(198) + (2)(46)  
++ (-1)(238) + (0)(138) + (1)(32)  
 
 = -707
-```
 
-Manual result: -707
+Manual result: **-707**
 
 ### Output cell (4,4)
 
-```text
-(-1)(32) + (0)(26) + (1)(31)
-+ (-2)(35) + (0)(36) + (2)(31)
-+ (-1)(22) + (0)(65) + (1)(33)
+(-1)(32) + (0)(26) + (1)(31)  
++ (-2)(35) + (0)(36) + (2)(31)  
++ (-1)(22) + (0)(65) + (1)(33)  
 
 = 2
-```
 
-Manual result: 2
+Manual result: **2**
 
 ---
 
@@ -701,92 +936,80 @@ Manual result: 2
 
 Kernel:
 
-```text
--1  -2  -1
- 0   0   0
- 1   2   1
-```
+-1 &nbsp;&nbsp; -2 &nbsp;&nbsp; -1  
+0 &nbsp;&nbsp;&nbsp;&nbsp; 0 &nbsp;&nbsp;&nbsp;&nbsp; 0  
+1 &nbsp;&nbsp;&nbsp;&nbsp; 2 &nbsp;&nbsp;&nbsp;&nbsp; 1  
 
 ### Output cell (0,0)
 
-```text
-(-1)(236) + (-2)(242) + (-1)(231)
-+ (0)(239) + (0)(239) + (0)(227)
-+ (1)(238) + (2)(225) + (1)(227)
+(-1)(236) + (-2)(242) + (-1)(231)  
++ (0)(239) + (0)(239) + (0)(227)  
++ (1)(238) + (2)(225) + (1)(227)  
 
 = -36
-```
 
-Manual result: -36
+Manual result: **-36**
 
 ### Output cell (2,2)
 
-```text
-(-1)(227) + (-2)(234) + (-1)(100)
-+ (0)(233) + (0)(198) + (0)(46)
-+ (1)(238) + (2)(138) + (1)(32)
+(-1)(227) + (-2)(234) + (-1)(100)  
++ (0)(233) + (0)(198) + (0)(46)  
++ (1)(238) + (2)(138) + (1)(32)  
 
 = -249
-```
 
-Manual result: -249
+Manual result: **-249**
 
 ### Output cell (4,4)
 
-```text
-(-1)(32) + (-2)(26) + (-1)(31)
-+ (0)(35) + (0)(36) + (0)(31)
-+ (1)(22) + (2)(65) + (1)(33)
+(-1)(32) + (-2)(26) + (-1)(31)  
++ (0)(35) + (0)(36) + (0)(31)  
++ (1)(22) + (2)(65) + (1)(33)  
 
 = 70
-```
 
-Manual result: 70
+Manual result: **70**
 
 ---
 
 ## Gradient Magnitude — Three Representative Cells
 
-Gradient magnitude was calculated from the manually computed Sobel Gx and Gy values.
+Gradient magnitude was calculated from the manually computed Sobel Gx and Gy values using:
+
+**Gradient magnitude = √(Gx² + Gy²)**
 
 ### Output cell (0,0)
 
-```text
-Gx = -40
-Gy = -36
+Gx = -40  
+Gy = -36  
 
-sqrt((-40)^2 + (-36)^2)
-= sqrt(2896)
+√((-40)² + (-36)²)  
+= √2896  
 ≈ 53.814
-```
 
-Manual result: 53.814
+Manual result: **53.814**
 
 ### Output cell (2,2)
 
-```text
-Gx = -707
-Gy = -249
+Gx = -707  
+Gy = -249  
 
-sqrt((-707)^2 + (-249)^2)
-= sqrt(561851)
+√((-707)² + (-249)²)  
+= √561851  
 ≈ 749.567
-```
 
-Manual result: 749.567
+Manual result: **749.567**
 
 ### Output cell (4,4)
 
-```text
-Gx = 2
-Gy = 70
+Gx = 2  
+Gy = 70  
 
-sqrt((2)^2 + (70)^2)
-= sqrt(4904)
+√((2)² + (70)²)  
+= √4904  
 ≈ 70.029
-```
 
-Manual result: 70.029
+Manual result: **70.029**
 
 ---
 
@@ -1014,22 +1237,13 @@ The assignment also demonstrated the importance of choosing an appropriate data 
 
 # Requirements
 
-This project uses:
+This project was completed using:
 
-- Python
+- Python 3.13.15
 - OpenCV
 - NumPy
 - Pandas
 - Matplotlib
-
-The required packages are listed in requirements.txt.
-
-To install them:
-
-```bash
-pip install -r requirements.txt
-```
-
 ---
 
 # Reproducibility
@@ -1038,10 +1252,18 @@ The programs use relative file paths rather than machine-specific absolute paths
 
 The workflow is:
 
-```text
 1. Run prepare_image.py
 2. Run opencv_operations.py
 3. Run verify_matrices.py
-```
+
 
 The generated numerical matrices and images are stored in the appropriate repository folders.
+
+# Execution Sequence
+
+Run the programs from the repository root in this order:
+
+python prepare_image.py
+python opencv_operations.py
+python manual_calculations.py
+python verify_matrices.py
