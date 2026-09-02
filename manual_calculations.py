@@ -56,6 +56,24 @@ pixel_coordinates = [
 # Read the BGR values directly from the current prepared image
 image = cv2.imread("images/image_200x200.png")
 
+# Five fixed pixel locations from the current 200 x 200 image
+pixel_coordinates = [
+    (25, 25),
+    (50, 150),
+    (100, 100),
+    (150, 50),
+    (175, 175)
+]
+
+# Load the current prepared color image
+image = cv2.imread("images/image_200x200.png")
+
+if image is None:
+    raise FileNotFoundError(
+        "Could not load images/image_200x200.png"
+    )
+
+# Read BGR values directly from the current image
 pixels = np.array(
     [image[row, col] for row, col in pixel_coordinates],
     dtype=np.float64
