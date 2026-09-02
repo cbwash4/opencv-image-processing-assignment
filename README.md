@@ -2,7 +2,7 @@
 
 ## Graduate Computer Vision Assignment
 
-This project uses image-processing operations - Python, OpenCV, NumPy, Pandas, and Matplotlib. I used the same iPhone selfie image throughout the assignment. The project includes image preparation, OpenCV image-processing operations, manual matrix calculations, and numerical verification of the manual results.
+This project uses image-processing operations - Python, OpenCV, NumPy, Pandas, and Matplotlib. I used the same iPhone image throughout the assignment. The project includes image preparation, OpenCV image-processing operations, manual matrix calculations, and numerical verification of the manual results.
 
 ---
 
@@ -22,10 +22,6 @@ This project uses image-processing operations - Python, OpenCV, NumPy, Pandas, a
 ---
 
 # Part A — Image Preparation
-
-## Original Image
-
-I used the same iPhone selfie photo for the entire assignment.
 
 ### Original Photograph
 
@@ -425,7 +421,103 @@ For the largest contour:
 - Centroid x-coordinate: approximately 143.95
 - Centroid y-coordinate: approximately 159.44
 ---
+---
 
+## Processed Image Results
+
+The following images show the visual results of the OpenCV operations described above. All processing was performed using the same prepared image.
+
+### Color and Intensity Results
+
+| Grayscale | Blue Channel | Green Channel |
+|:---:|:---:|:---:|
+| ![Grayscale](outputs/color_intensity/images/01_grayscale.png) | ![Blue channel](outputs/color_intensity/images/02_blue_channel.png) | ![Green channel](outputs/color_intensity/images/02_green_channel.png) |
+
+| Red Channel | BGR Reconstruction | Negative |
+|:---:|:---:|:---:|
+| ![Red channel](outputs/color_intensity/images/02_red_channel.png) | ![BGR reconstruction](outputs/color_intensity/images/03_reconstructed_color.png) | ![Negative](outputs/color_intensity/images/04_negative.png) |
+
+| Brightness +40 | Contrast ×1.25 | Binary Threshold |
+|:---:|:---:|:---:|
+| ![Brightness increased by 40](outputs/color_intensity/images/05_brightness_plus_40.png) | ![Contrast increased by 1.25](outputs/color_intensity/images/06_contrast_1_25.png) | ![Binary threshold](outputs/color_intensity/images/07_binary_threshold_127.png) |
+
+#### Histogram Equalization
+
+| Original/Grayscale | Equalized |
+|:---:|:---:|
+| ![Grayscale image](outputs/color_intensity/images/01_grayscale.png) | ![Histogram equalized image](outputs/color_intensity/images/08_histogram_equalized.png) |
+
+| Original Histogram | Equalized Histogram |
+|:---:|:---:|
+| ![Original histogram](outputs/color_intensity/histograms/09_original_histogram.png) | ![Equalized histogram](outputs/color_intensity/histograms/09_equalized_histogram.png) |
+
+---
+
+### Geometric Results
+
+| Center Crop | Horizontal Flip | Vertical Flip |
+|:---:|:---:|:---:|
+| ![Center crop](outputs/geometric/images/10_center_100x100.png) | ![Horizontal flip](outputs/geometric/images/11_horizontal_flip.png) | ![Vertical flip](outputs/geometric/images/12_vertical_flip.png) |
+
+| 90° Clockwise Rotation | 30° Counterclockwise Rotation | Resize to 100 × 100 |
+|:---:|:---:|:---:|
+| ![90 degree clockwise rotation](outputs/geometric/images/13_rotate_90.png) | ![30 degree rotation](outputs/geometric/images/14_rotate_30.png) | ![Resize to 100 x 100](outputs/geometric/images/15_resize_100x100.png) |
+
+#### Interpolation Comparison
+
+| Nearest Neighbor | Bilinear |
+|:---:|:---:|
+| ![Nearest neighbor interpolation](outputs/geometric/images/16_nearest_neighbor.png) | ![Bilinear interpolation](outputs/geometric/images/16_bilinear.png) |
+
+The nearest-neighbor result shows more distinct pixel boundaries, while bilinear interpolation produces smoother transitions between neighboring pixel values.
+
+---
+
+### Spatial Filtering Results
+
+| Mean Filter | Gaussian Filter | Median Filter |
+|:---:|:---:|:---:|
+| ![Mean filter](outputs/filtering/images/17_mean_filter.png) | ![Gaussian filter](outputs/filtering/images/18_gaussian_filter.png) | ![Median filter](outputs/filtering/images/19_median_filter.png) |
+
+The three filters smooth the grayscale image differently. The mean filter averages neighboring values, the Gaussian filter applies weighted smoothing, and the median filter replaces each pixel with the median value of its neighborhood.
+
+---
+
+### Edge Detection Results
+
+| Sobel X | Sobel Y | Gradient Magnitude |
+|:---:|:---:|:---:|
+| ![Sobel X](outputs/edges/images/20_sobel_x.png) | ![Sobel Y](outputs/edges/images/21_sobel_y.png) | ![Gradient magnitude](outputs/edges/images/22_gradient_magnitude.png) |
+
+| Laplacian | Canny |
+|:---:|:---:|
+| ![Laplacian](outputs/edges/images/23_laplacian.png) | ![Canny edge detection](outputs/edges/images/24_canny.png) |
+
+Sobel X and Sobel Y emphasize intensity changes in different directions. Gradient magnitude combines the two Sobel responses. Laplacian responds to rapid intensity changes, while Canny produces a binary representation of prominent edges.
+
+---
+
+### Morphological Results
+
+| Erosion | Dilation |
+|:---:|:---:|
+| ![Erosion](outputs/morphology/images/25_erosion.png) | ![Dilation](outputs/morphology/images/26_dilation.png) |
+
+| Opening | Closing |
+|:---:|:---:|
+| ![Opening](outputs/morphology/images/27_opening.png) | ![Closing](outputs/morphology/images/28_closing.png) |
+
+Erosion reduces white foreground regions, while dilation expands them. Opening performs erosion followed by dilation, and closing performs dilation followed by erosion.
+
+---
+
+### Contour Results
+
+| Contour Mask | All Detected Contours | Largest Contour |
+|:---:|:---:|:---:|
+| ![Contour mask](outputs/contours/images/30_contour_mask.png) | ![All contours](outputs/contours/images/31_all_contours.png) | ![Largest contour](outputs/contours/images/32_largest_contour.png) |
+
+The contour results show the binary mask used for contour detection, all detected contour boundaries, and the largest detected contour.
 # Part C — Manual Matrix Calculations
 
 ## Selected 7 × 7 Grayscale Patch
@@ -1037,11 +1129,10 @@ Output = 255
 
 Neighborhood:
 
-```text
 255  255    0
 255  255    0
 255  255    0
-```
+
 
 The neighborhood contains 0 values.
 
