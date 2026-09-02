@@ -44,13 +44,22 @@ def save_comparison(operation, input_matrix, manual, opencv):
 # ------------------------------------------------------------
 
 # B, G, R values from five selected pixels
-pixels = np.array([
-    [135, 156, 166],
-    [110, 128, 122],
-    [97, 120, 180],
-    [3, 3, 3],
-    [215, 216, 211]
-], dtype=np.float64)
+# Five fixed pixel locations from the current 200 x 200 image
+pixel_coordinates = [
+    (25, 25),
+    (50, 150),
+    (100, 100),
+    (150, 50),
+    (175, 175)
+]
+
+# Read the BGR values directly from the current prepared image
+image = cv2.imread("images/image_200x200.png")
+
+pixels = np.array(
+    [image[row, col] for row, col in pixel_coordinates],
+    dtype=np.float64
+)
 
 B = pixels[:, 0]
 G = pixels[:, 1]
@@ -60,8 +69,10 @@ manual_gray = np.rint(
     0.114 * B + 0.587 * G + 0.299 * R
 ).astype(np.uint8)
 
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
 opencv_gray = np.array(
-    [157, 124, 135, 3, 214],
+    [gray[row, col] for row, col in pixel_coordinates],
     dtype=np.uint8
 )
 
